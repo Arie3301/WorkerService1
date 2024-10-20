@@ -1,8 +1,6 @@
 namespace App.WindowsService;
 
 public sealed class WindowsBackgroundService(
-    JokeService jokeService,
-    FileToDiskWriter fileToDiskWriter,
     TwilioSmsService twilioSmsService,
     ILogger<WindowsBackgroundService> logger) : BackgroundService
 {
@@ -13,14 +11,6 @@ public sealed class WindowsBackgroundService(
             while (!stoppingToken.IsCancellationRequested)
             {
                 await twilioSmsService.SendSmsAsync();
-
-                string joke = jokeService.GetJoke();
-                logger.LogWarning("{Joke}", joke);
-                fileToDiskWriter.WriteFileToDisk();
-
-                string dateTime = await WorldTimeFetcher.FetchCurrentDateTimeAsync();
-                logger.LogWarning($"Current Date and Time (UTC): {dateTime}");
-
                 await Task.Delay(TimeSpan.FromSeconds(12), stoppingToken);
             }
         }
